@@ -1,0 +1,110 @@
+Ubuntu Service Pack Maker Prototype
+--------------------------------------------------
+
+Legal rubbish
+--------------
+
+The folders com, jeta.resources, META_INF and org are needed due to the RAD tool
+used to make the GUI, and thus are not part of the application itself and do not
+fall under my copyrights.
+
+The actual application files (MainInterface.java, Pack.java, Package.java and
+PackageList.java and compiled files) have been put into the Public Domain. Do
+what you want with them. However, this tool is not finished and forking
+development would be ridiculous at this stage, so it is encouraged that the
+application as-is is not to be used outside of testing and development.
+
+Introduction and Explanation
+------------------------------
+
+This is a non-functional prototype for a tool to enhance the usefulness of the
+current Debian package management system. Its purpose is to create isolated
+package repositories for user-specified pieces of software which contain all
+needed dependencies along with a meta-package which depends on them. This
+makes distributing software as packages much easier, since the individual
+qualities of the package management system are not changed (updates,
+dependencies, etc.), but the current hassles of distributing packaged
+software, along with needed dependencies such as libraries, (which currently
+involves either setting up a new repository, making users manually install
+large numbers of packages in a certain order, or collecting all of the needed
+dependencies into one huge, policy-breaking package) can be overcome with the
+use of Service Packs.
+
+Service packs, as made by this tool, are small APT repositories which house all
+of the packages needed by their components (with user-specified assumptions
+allowed, for example that a package such as Ubuntu's "ubuntu-desktop" is
+installed, which guarantees certain packages, or at a lower level that LSB
+functions will be available).
+
+In each service pack, accompanying the repository, is a meta-package (a package
+which contains no files, but still has dependencies) with the same name as the
+service pack which depends on all of the packages specified to be in the service
+pack (but not their dependencies, which may change on updates). The meta-package
+can also depend on the meta-packages of other service packs, and thus assume
+that the contents of that service pack are also installed (this would allow
+incremental service packs, like monthly updates, to be kept small as they only
+contain changes from date of the last service pack, not from scratch).
+
+Upon installation of the meta-package (which sits in a directory outside the
+repository, and thus is easily accessible) the repository is temporarily added
+as an APT source, the package is installed along with its dependencies, which if
+not already available will be taken from the service pack's repository, then the
+service pack is removed as an APT source and the service pack has finished
+installing.
+
+The main point to note about the functioning of this tool is that it does not
+propose a new way of installing software. It does not propose any new formats
+for saving software. It exists solely to use the existing APT framework in a new
+way. For installing software, using a service pack is essentially the same as
+using an online APT repository, except that it is all saved locally so machines
+with no network can use it (yes, APT repositories can be local too, but require
+more setting up. This tool essential eases that setting up) and the repository
+handling is setup and cleaned up automatically during installation of a
+service pack (ie. there is no need to enter and clean up repository information
+manually, as is the case when using a CD as an APT source for example). A
+disadvantage of service packs compared to regular repositories is the lack of
+updates (installed packages will still get updated via any regular repositories
+used, but for packages only distributed via service packs there will be no
+updates until a new service pack is released).
+
+Technical Info for Developers
+-------------------------------
+
+This prototype is written in Java, only because that is the language I am most
+familiar with due to its use in my computing courses. The final implementation
+will be in Python and GTK/QT, since a small one-off-use tool like this would
+not cause any massive performance drain using an interpreted language.
+
+Here is a description of the components and their current status:
+
+MainInterface.java	- This is the runnable class (ie. running
+			  "java MainInterface" in a console will execute it)
+			  The "Advanced" button should really be a tab.
+			  A "browse" button should sit alongside the "location"
+			  entry.
+			  Standalone (not in rpository) packages should be
+			  addable, perhaps by specifying a full path instead of
+			  just a package name
+			  The createPack method requires work (using
+			  PackageList to give Packages dependencies, etc.).
+			  
+Pack.java		- This represents a service pack, and also contains a
+			  static method for creating packages based on text
+			  containing their names.
+			  
+Package.java		- This represents a Debian package.
+			  Dependency adding needs to be sorted out.
+			  
+PackageList.java	- This handles the system's APT information, namely a
+			  large list of the available packages and their
+			  associated information (dependencies, etc.)
+			  Needs work opening and using the list files.
+
+More Information
+------------------
+
+Any help is appreciated. A specification for this tool can be found on the
+Ubuntu Wiki at https://wiki.ubuntu.com/TransparentServicePackMaker.
+
+Thanks,
+Warbo
